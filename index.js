@@ -5,71 +5,40 @@ require("dotenv").config();
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-const LINE_API_URL = "https://api.line.me/v2/bot/message/reply";
-
-// Entry point for LINE webhook
 app.post("/reply", async (req, res) => {
-  const events = req.body.events;
+  const data = req.body;
 
-  if (!events || !Array.isArray(events)) {
-    return res.status(400).json({ error: "Invalid request" });
-  }
+  if (data.events && data.events[0].source.type === "group") {
+    const groupId = data.events[0].source.groupId;
+    const replyToken = data.events[0].replyToken;
 
-  for (const event of events) {
-    const { replyToken, source } = event;
-
-    if (!replyToken || !source || !source.type) continue;
-
-    let message = "";
-
-    switch (source.type) {
-      case "group":
-        message = `👥 This is your Group ID:\n${source.groupId}`;
-        break;
-      case "room":
-        message = `💬 This is your Room ID:\n${source.roomId}`;
-        break;
-      case "user":
-        message = `🙋‍♂️ This is your User ID:\n${source.userId}`;
-        break;
-      default:
-        message = "⚠️ Unknown source type.";
-        break;
-    }
-
-    console.log(`[${source.type.toUpperCase()}] Incoming event`, source);
-
-    await replyMessage(replyToken, message);
+    await replyMessage(replyToken, `This is your Group ID: ${groupId}`);
   }
 
   res.json({ status: "success" });
 });
 
-// Send reply message to LINE
 async function replyMessage(replyToken, message) {
+  const url = "https://api.line.me/v2/bot/message/reply";
   const payload = {
     replyToken,
     messages: [{ type: "text", text: message }],
   };
 
   try {
-    await axios.post(LINE_API_URL, payload, {
+    await axios.post(url, payload, {
       headers: {
         Authorization: `Bearer ${process.env.LINE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
     });
-    console.log("✅ Replied message to LINE");
   } catch (error) {
     console.error(
-      "❌ Error sending message to LINE:",
+      "Error sending message to LINE:",
       error.response?.data || error.message
     );
   }
 }
 
-// Start the Express server
-app.listen(PORT, () => {
-  console.log(`🚀 LINE bot server running at http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
