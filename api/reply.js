@@ -7,6 +7,7 @@ module.exports = async (req, res) => {
   }
 
   const data = req.body;
+  console.log("data", data);
 
   // ตรวจสอบว่า 'events' มีค่าและเป็นประเภทที่ถูกต้อง
   if (data.events && data.events[0] && data.events[0].source.type === "group") {
