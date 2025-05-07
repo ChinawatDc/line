@@ -7,7 +7,9 @@ module.exports = async (req, res) => {
   }
 
   const data = req.body;
-  console.log("data", data);
+
+  // Log ข้อมูลที่ได้รับจาก LINE เพื่อทำการตรวจสอบ
+  console.log("Received data:", data);
 
   // ตรวจสอบว่า 'events' มีค่าและเป็นประเภทที่ถูกต้อง
   if (data.events && data.events[0] && data.events[0].source.type === "group") {
@@ -16,13 +18,14 @@ module.exports = async (req, res) => {
 
     try {
       await replyMessage(replyToken, `This is your Group ID: ${groupId}`);
-      res.status(200).json({ status: "success" }); // ส่ง status 200 เมื่อทุกอย่างสำเร็จ
+      return res.status(200).json({ status: "success" }); // ส่ง status 200 เมื่อทุกอย่างสำเร็จ
     } catch (error) {
       console.error("Error while replying to LINE:", error);
-      res.status(500).json({ error: "Internal Server Error" }); // ส่ง status 500 ถ้ามีข้อผิดพลาด
+      return res.status(500).json({ error: "Internal Server Error" }); // ส่ง status 500 ถ้ามีข้อผิดพลาด
     }
   } else {
-    res.status(400).json({ error: "Invalid data structure" }); // ส่ง status 400 ถ้าข้อมูลไม่ถูกต้อง
+    console.log("Invalid data structure:", data);
+    return res.status(400).json({ error: "Invalid data structure" }); // ส่ง status 400 ถ้าข้อมูลไม่ถูกต้อง
   }
 };
 
