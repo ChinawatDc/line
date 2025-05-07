@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     await replyMessage(replyToken, `This is your Group ID: ${groupId}`);
   }
 
-  res.json({ status: "success" });
+  res.status(200).json({ status: "success" });
 };
 
 async function replyMessage(replyToken, message) {
