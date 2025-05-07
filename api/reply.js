@@ -1,10 +1,10 @@
-const express = require("express");
 const axios = require("axios");
-const app = express();
 
-app.use(express.json());
+module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-const handler = app.post("/api/reply", async (req, res) => {
   const data = req.body;
 
   if (data.events && data.events[0].source.type === "group") {
@@ -15,7 +15,7 @@ const handler = app.post("/api/reply", async (req, res) => {
   }
 
   res.json({ status: "success" });
-});
+};
 
 async function replyMessage(replyToken, message) {
   const url = "https://api.line.me/v2/bot/message/reply";
@@ -38,5 +38,3 @@ async function replyMessage(replyToken, message) {
     );
   }
 }
-
-module.exports = handler;
